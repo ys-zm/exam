@@ -174,7 +174,6 @@ bool    ft_if_match(char *str, t_list *list)
     tag = ft_substr(len, str);
     while (list && list->next != NULL)
         list = list->next;
-    printf("check %s -- %s\n", tag, list->tag);
     if (ft_strncmp(list->tag, tag, len))
         return (true);
     return (false);
@@ -196,7 +195,6 @@ bool    ft_check(char *str)
             i++;
         }
         printf("str h: %s\n", str + i);
-        // printf("list: %s\n", list->tag);
         if (ft_is_cl_tag(str + i))
         {
             printf("is closed, %s -- %s\n", str + i, list->tag);
@@ -212,10 +210,7 @@ bool    ft_check(char *str)
             }
             else
                 return (false);
-            printf("here |%s|\n", str + i);
         }
-        // else
-        //     i++;
     }
     if (list)
         return (false);
