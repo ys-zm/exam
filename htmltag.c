@@ -71,34 +71,67 @@ bool    ft_is_op_tag(char *str)
 {
     int     i = 0;
 
-    if (str[i] == '<')
+    while (str[i] && str[i] != '<')
         i++;
+    if (str[i] == '\0')
+        return (false);
+    i++;
     if (str[i] == '/')
         return (false);
-    else
+    while (str[i] && str[i] != '>')
         i++;
-    while (str && str[i] != '>')
-        i++;
-    if (str && str[i] == '>')
+    if (str[i] && str[i] == '>')
         return (true);
-    return (false);
+    else
+        return (false);
 }
 
 bool    ft_is_cl_tag(char *str)
 {
     int i = 0;
 
-    if (str[i] == '<')
+    while (str[i] && str[i] != '<')
         i++;
+    if (str[i] == '\0')
+        return (false);
+    i++;
     if (str[i] != '/')
         return (false);
     else
         i++;
-    while (str[i] != '>')
+    while (str[i] && str[i] != '>')
         i++;
-    if (str[i] == '>')
+    if (str[i] && str[i] == '>')
         return (true);
-    return (false);
+    else
+        return (false);
+}
+
+t_list    *ft_pop_2(t_list *list)
+{
+    t_list *next;
+    t_list  *prev;
+    
+    if (! list)
+        return (NULL);
+    prev = list;
+    next = list->next;
+    if (next == NULL)
+    {
+        free(prev->tag);
+        free(prev);
+        return (NULL);
+    }
+    while (next->next)
+    {
+        prev = next;
+        next = next->next;
+    }
+    // free(next->tag);
+    free(next);
+    prev->next = NULL;
+    next = NULL;
+    return (list);
 }
 
 t_list    *ft_pop(t_list *list)
@@ -129,15 +162,19 @@ bool    ft_if_match(char *str, t_list *list)
 {
     int len = 0;
     char    *tag;
-    str++;
-    str++;
+
     if (!list)
         return (false);
-    while (str[len] != '>')
+    while (*str && *str != '<')
+        str++;
+    str++;
+    str++;
+    while (str[len] && str[len] != '>')
         len++;
     tag = ft_substr(len, str);
     while (list && list->next != NULL)
         list = list->next;
+    printf("check %s -- %s\n", tag, list->tag);
     if (ft_strncmp(list->tag, tag, len))
         return (true);
     return (false);
@@ -151,39 +188,44 @@ bool    ft_check(char *str)
     list = NULL;
     while (str && str[i])
     {
-        if (ft_is_op_tag(&str[i]))
+        if (ft_is_op_tag(str + i))
         {
             list = ft_push_to_list(list, &str[i]);
             while (str[i] != '>')
                 i++;
             i++;
         }
-        printf("str h: %s\n", &str[i]);
-        printf("list: %s\n", list->tag);
-        if (ft_is_cl_tag(&str[i]))
+        printf("str h: %s\n", str + i);
+        // printf("list: %s\n", list->tag);
+        if (ft_is_cl_tag(str + i))
         {
-            if (ft_if_match(&str[i], list))
+            printf("is closed, %s -- %s\n", str + i, list->tag);
+            if (ft_if_match(str + i, list))
             {
-                list = ft_pop(list);
-                while (str[i] != '>')
+                list = ft_pop_2(list);  
+                while (str[i] && str[i] != '<')
+                    i++;
+                i += 2;
+                while (str[i] && str[i] != '>')
                     i++;
                 i++;
             }
             else
                 return (false);
+            printf("here |%s|\n", str + i);
         }
-        i++;
+        // else
+        //     i++;
     }
     if (list)
         return (false);
-    return (true);
+    else
+        return (true);
 }
 
+// compile the file with: gcc -Wall -Wextra -Werror -fsanitize=address -g3 htmltag.c -o exe 
 int main(int argc, char **argv)
 {
-
-
-
     if (argc == 1)
         return (1);
     if (ft_check(argv[1]))
